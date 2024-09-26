@@ -1,0 +1,7 @@
+root = true
+
+# All files
+[*]
+
+# Unix EOF convention
+insert_final_newline = true
