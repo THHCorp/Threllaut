@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "Debug Aspire & MAUI",
+    "Projects": [
+      {
+        "Path": "Threllaut.AppHost\\Threllaut.AppHost.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Threllaut\\Threllaut.csproj",
+        "Action": "Start",
+        "DebugTarget": "Windows Machine"
+      }
+    ]
+  },
+  {
+    "Name": "Start Aspire & MAUI",
+    "Projects": [
+      {
+        "Path": "Threllaut.AppHost\\Threllaut.AppHost.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Threllaut\\Threllaut.csproj",
+        "Action": "Start",
+        "DebugTarget": "Windows Machine"
+      }
+    ]
+  }
+]
