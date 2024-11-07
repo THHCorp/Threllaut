@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Threllaut.Data\Threllaut.Data.csproj" />
     <ProjectReference Include="..\Threllaut.ServiceDefaults\Threllaut.ServiceDefaults.csproj" />
   </ItemGroup>
 

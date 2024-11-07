@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-using Threllaut.ApiService.Data;
+using Threllaut.Data;
+using Threllaut.Data.Contexts;
 
 namespace Threllaut.ApiService.Database.Contexts;
 

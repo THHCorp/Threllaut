@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-using Threllaut.ApiService.Data;
+using Threllaut.Data;
 using Threllaut.ApiService.Database.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Threllaut.ApiService.Data;
+namespace Threllaut.Data;
 
 public class ApplicationUser : IdentityUser<Guid>;
-

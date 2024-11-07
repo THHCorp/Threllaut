@@ -1,4 +1,4 @@
-﻿namespace Threllaut.ApiService.Database.Contexts;
+﻿namespace Threllaut.Data.Contexts;
 
 public interface IDbContext
 {
