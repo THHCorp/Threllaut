@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Threllaut.ApiService.Database.Migrations.Identity
+namespace Threllaut.Data.Migrations.Identity
 {
     /// <inheritdoc />
     public partial class CreateSchema : Migration

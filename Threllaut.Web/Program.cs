@@ -1,9 +1,22 @@
+using Aspire.Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using Threllaut.Web.Components;
+using Threllaut.Data;
+using Threllaut.Data.Contexts;
 using Threllaut.Shared.Services;
+using Threllaut.Web.Components;
 using Threllaut.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddSqlServerDbContext<IdentityDbContext>("database");
+builder.AddSqlServerDbContextFactory<ApplicationDbContext>("database");
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<IdentityDbContext>();
+
+builder.Services.AddAuthorization();
 
 builder.AddServiceDefaults();
 
@@ -13,9 +26,6 @@ builder.Services.AddMudServices()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
-
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
-    client.BaseAddress = new("https+http://apiservice"));
 
 var app = builder.Build();
 
@@ -44,3 +54,74 @@ app.MapRazorComponents<App>()
         typeof(Threllaut.Web.Client._Imports).Assembly);
 
 await app.RunAsync();
+
+public static partial class Program
+{
+    public static IHostApplicationBuilder AddSqlServerDbContextFactory<TContext>(this IHostApplicationBuilder builder,
+        string connectionName)
+    where TContext : DbContext
+    {
+        const string DefaultConfigSectionName = "Aspire:Microsoft:EntityFrameworkCore:SqlServer";
+        string typeSpecificSectionName = $"{DefaultConfigSectionName}:{typeof(TContext).Name}";
+        MicrosoftEntityFrameworkCoreSqlServerSettings settings = new();
+        var configurationSection = builder.Configuration.GetSection(DefaultConfigSectionName);
+        configurationSection.Bind(settings);
+        var typeSpecificConfigurationSection = configurationSection.GetSection(typeof(TContext).Name);
+        if (typeSpecificConfigurationSection.Exists())
+        {
+            typeSpecificConfigurationSection.Bind(settings);
+        }
+
+        settings.ConnectionString = builder.Configuration.GetConnectionString(connectionName);
+        builder.Services.AddDbContextFactory<ApplicationDbContext>(builder =>
+            builder.UseSqlServer(settings.ConnectionString, builder =>
+            {
+                if (string.IsNullOrWhiteSpace(settings.ConnectionString) && !EF.IsDesignTime)
+                {
+                    throw new InvalidOperationException($"ConnectionString is missing. It should be provided in 'ConnectionStrings:{connectionName}' "
+                        + $"or under the 'ConnectionString' key in '{DefaultConfigSectionName}' "
+                        + $"{(!string.IsNullOrEmpty(typeSpecificSectionName) ? "or '{typeSpecificSectionName}' " : string.Empty)}configuration section.");
+                }
+
+                // Resiliency:
+                // Connection resiliency automatically retries failed database commands
+                if (!settings.DisableRetry)
+                {
+                    builder.EnableRetryOnFailure();
+                }
+
+                // The time in seconds to wait for the command to execute.
+                if (settings.CommandTimeout.HasValue)
+                {
+                    builder.CommandTimeout(settings.CommandTimeout);
+                }
+            }));
+
+        if (!settings.DisableTracing)
+        {
+            /*builder.Services.AddOpenTelemetry().WithTracing(builder =>
+            {
+                builder.AddInstrumentation(sp =>
+                {
+                    var sqlOptions = sp.GetRequiredService<IOptionsMonitor<SqlClientTraceInstrumentationOptions>>().Get(name);
+
+                    return new SqlClientInstrumentation(sqlOptions);
+                });
+
+                builder.AddSource(SqlActivitySourceHelper.ActivitySourceName);
+            });*/
+        }
+
+        if (!settings.DisableHealthChecks)
+        {
+            string key = "Aspire.HealthChecks." + typeof(TContext).Name;
+            if (!builder.Properties.ContainsKey(key))
+            {
+                builder.Properties[key] = true;
+                builder.Services.AddHealthChecks()
+                    .AddDbContextCheck<TContext>();
+            }
+        }
+        return builder;
+    }
+}

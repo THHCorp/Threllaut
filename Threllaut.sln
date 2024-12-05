@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Threllaut.Web", "Threllaut.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Threllaut.Web.Client", "Threllaut.Web.Client\Threllaut.Web.Client.csproj", "{7C064C71-30BE-4D8D-9B68-E7249ED18FA1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Threllaut.Data", "Threllaut.Data\Threllaut.Data.csproj", "{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7F437A72-B8A4-41B5-86A0-9AD0E54E5D17}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -167,6 +169,22 @@ Global
 		{C2800ABA-8C19-4553-A552-BFF679BEB039}.Release|x86.ActiveCfg = Release|Any CPU
 		{C2800ABA-8C19-4553-A552-BFF679BEB039}.Release|x86.Build.0 = Release|Any CPU
 		{C2800ABA-8C19-4553-A552-BFF679BEB039}.Release|x86.Deploy.0 = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|x64.Build.0 = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Debug|x86.Build.0 = Debug|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|ARM64.Build.0 = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|x64.ActiveCfg = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|x64.Build.0 = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|x86.ActiveCfg = Release|Any CPU
+		{3723DB9A-D1FE-41EB-AD2A-D1550DFE3A12}.Release|x86.Build.0 = Release|Any CPU
 		{7C064C71-30BE-4D8D-9B68-E7249ED18FA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7C064C71-30BE-4D8D-9B68-E7249ED18FA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C064C71-30BE-4D8D-9B68-E7249ED18FA1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

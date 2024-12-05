@@ -1,13 +1,14 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var sqlServer = builder.AddSqlServer("sqlserver");
-var apiDatabase = sqlServer.AddDatabase("apidatabase");
+var database = builder.AddSqlServer("sqlserver")
+    .AddDatabase("database");
 
-var apiService = builder.AddProject<Projects.Threllaut_ApiService>("apiservice")
-    .WithReference(apiDatabase);
+builder.AddProject<Projects.Threllaut_ApiService>("apiservice")
+    .WithExternalHttpEndpoints()
+    .WithReference(database);
 
 builder.AddProject<Projects.Threllaut_Web>("webapp")
     .WithExternalHttpEndpoints()
-    .WithReference(apiService);
+    .WithReference(database);
 
 await builder.Build().RunAsync();

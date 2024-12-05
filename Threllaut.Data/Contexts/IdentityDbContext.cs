@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-using Threllaut.Data;
-using Threllaut.Data.Contexts;
-
-namespace Threllaut.ApiService.Database.Contexts;
+namespace Threllaut.Data.Contexts;
 
 public class IdentityDbContext(DbContextOptions<IdentityDbContext> options)
     : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options),

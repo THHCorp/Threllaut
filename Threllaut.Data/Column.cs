@@ -1,5 +1,8 @@
-﻿namespace Threllaut.Data;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Threllaut.Data;
+
+[Table("Columns")]
 public class Column
 {
     public Guid Id { get; set; }

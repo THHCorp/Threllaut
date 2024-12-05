@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Threllaut.ApiService.Database.Contexts;
+using Threllaut.Data.Contexts;
 
 #nullable disable
 
-namespace Threllaut.ApiService.Database.Migrations.Identity
+namespace Threllaut.Data.Migrations.Identity
 {
     [DbContext(typeof(IdentityDbContext))]
     partial class IdentityDbContextModelSnapshot : ModelSnapshot
@@ -18,7 +18,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("identity")
-                .HasAnnotation("ProductVersion", "9.0.0-rc.1.24451.1")
+                .HasAnnotation("ProductVersion", "9.0.0-rc.2.24474.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -154,7 +154,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
                     b.ToTable("UserTokens", "identity");
                 });
 
-            modelBuilder.Entity("Threllaut.ApiService.Data.ApplicationUser", b =>
+            modelBuilder.Entity("Threllaut.Data.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -231,7 +231,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Threllaut.ApiService.Data.ApplicationUser", null)
+                    b.HasOne("Threllaut.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -240,7 +240,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("Threllaut.ApiService.Data.ApplicationUser", null)
+                    b.HasOne("Threllaut.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -255,7 +255,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Threllaut.ApiService.Data.ApplicationUser", null)
+                    b.HasOne("Threllaut.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -264,7 +264,7 @@ namespace Threllaut.ApiService.Database.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("Threllaut.ApiService.Data.ApplicationUser", null)
+                    b.HasOne("Threllaut.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
