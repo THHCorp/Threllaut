@@ -1,0 +1,20 @@
+﻿<MudText Typo="Typo.h4">History for task '@Item.Name'</MudText>
+
+<MudDataGrid Items="Item.Events" Filterable>
+    <Columns>
+        <PropertyColumn Property="t => t.PreviousColumn != null ? t.PreviousColumn.Name : string.Empty" Title="Removed from" Sortable="true" />
+        <PropertyColumn Property="t => t.Column.Name" Title="Placed in" Sortable="true" />
+        <PropertyColumn Property="t => t.Date" Sortable="true" />
+        <PropertyColumn Property="t => t.User" Sortable="true" SortBy="task => task.User.NormalizedUserName"
+            Groupable="true" GroupBy="task => task.User.Id">
+            <GroupTemplate>
+                Changes by @(context.Grouping.First().User.UserName)
+            </GroupTemplate>
+        </PropertyColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    [Parameter]
+    public required BoardTask Item { get; set; }
+}

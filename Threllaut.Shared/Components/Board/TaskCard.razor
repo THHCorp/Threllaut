@@ -1,0 +1,9 @@
+﻿<MudCard Class="my-1">
+    <MudCardHeader>@Item.Name</MudCardHeader>
+    <MudCardContent>@Item.Description</MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public required Data.BoardTask Item { get; set; }
+}

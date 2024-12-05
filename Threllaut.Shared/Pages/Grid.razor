@@ -1,0 +1,46 @@
+﻿@page "/grid"
+
+@using Microsoft.EntityFrameworkCore
+@using Threllaut.Data.Contexts
+@using Threllaut.Shared.Components.TaskGrid
+
+@implements IDisposable
+
+@inject IDbContextFactory<ApplicationDbContext> Factory
+
+<PageTitle>Grid</PageTitle>
+
+@if (_board is null)
+{
+    <MudAutocomplete @ref=_boardSelector Label="Board" @bind-Value="_board"
+    SearchFunc="Search" ToStringFunc="@(c => c?.Name)"
+    Clearable="true" OnClearButtonClick="Clear" />
+} else {
+    <TaskGrid Item="_board" />
+}
+
+@code {
+    private Data.Board? _board = null;
+    private MudAutocomplete<Data.Board> _boardSelector = default!;
+    private List<Data.Board> _boards = default!;
+
+    private ApplicationDbContext Context = default!;
+
+    public void Dispose() => Context?.Dispose();
+
+    protected override async Task OnInitializedAsync() 
+    {
+        Context = await Factory.CreateDbContextAsync();
+        _boards = await Context.Boards.AsSingleQuery().AsNoTracking().ToListAsync();
+    }
+
+    private async Task Clear()
+    {
+        this._board = null;
+        await _boardSelector.ResetAsync();
+        StateHasChanged();
+    }
+
+    private async Task<IEnumerable<Data.Board>> Search(string? value, CancellationToken cancellationToken = default) =>
+        (IEnumerable<Data.Board>)_boards.Where(c => c.Name.Contains(value ?? string.Empty));
+}

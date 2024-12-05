@@ -1,0 +1,53 @@
+﻿@using System.ComponentModel.DataAnnotations
+<MudCard Style="width: 200px">
+    <MudCardHeader>@Item.Name</MudCardHeader>
+    <MudCardContent>
+        <MudDropZone T="BoardTask" AllowReorder Identifier="@Item.Id.ToString()" Class="object-fill" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton OnClick="() => _open = !_open">@(_open ? "Close" : "Add task")</MudButton>
+        <MudPopover Open="_open" OverflowBehavior="OverflowBehavior.FlipAlways" Paper="false" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+            <MudCard>
+                <MudCardHeader>Add new task</MudCardHeader>
+                <MudCardContent>
+                    <MudForm @bind-IsValid="_success" ValidationDelay="50">
+                        <MudTextField @ref=_nameField T="string" Label="Name" Required RequiredError="Name is required."
+                                      Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" />
+                        <MudTextField @ref=_descriptionField T="string" Label="Description" />
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=AddTaskAsync>Add</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudPopover>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private bool _success;
+    private bool _open;
+    private MudTextField<string> _nameField = default!;
+    private MudTextField<string> _descriptionField = default!;
+
+    [Parameter]
+    public required Column Item { get; set; }
+
+    [Parameter]
+    public EventCallback<BoardTask> OnNewTask { get; set; }
+
+    private Task AddTaskAsync()
+    {
+        var task = new BoardTask
+        {
+            Name = _nameField.Value!,
+            Description = _descriptionField.Value,
+            Column = Item,
+            Assignees = [],
+            Events = []
+        };
+        Item.Tasks.Add(task);
+        _open = false;
+        return OnNewTask.InvokeAsync(task);
+    }
+}

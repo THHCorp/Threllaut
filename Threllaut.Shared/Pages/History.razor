@@ -1,0 +1,38 @@
+﻿@page "/history"
+
+@using Threllaut.Shared.Components.Board
+
+<PageTitle>History</PageTitle>
+
+<TaskHistory Item="task" />
+
+@code {
+    private BoardTask task = CreateTask();
+
+    private static BoardTask CreateTask()
+    {
+        Column toDoColumn = new() { Id = Guid.NewGuid(), Name = "To Do", Description = "Tasks not yet started", Board = null!, Tasks = [] },
+            inProgressColumn = new() { Id = Guid.NewGuid(), Name = "In Progress", Description = "Tasks currently being worked on", Board = null!, Tasks = [] },
+            doneColumn = new() { Id = Guid.NewGuid(), Name = "Done", Description = "Tasks that have been completed", Board = null!, Tasks = [] };
+
+        ApplicationUser user1 = new() { Id = Guid.NewGuid(), UserName = "ThibautHH", NormalizedUserName = "THIBAUTHH" },
+            user2 = new() { Id = Guid.NewGuid(), UserName = "torvalds", NormalizedUserName = "TORVALDS" };
+
+        var task = new BoardTask
+        {
+            Id = Guid.NewGuid(),
+            Name = "Task 1",
+            Assignees = [],
+            Column = doneColumn,
+            Events = []
+        };
+
+        task.Events.Add(new() { Id = Guid.NewGuid(), Date = DateTimeOffset.Now.AddMinutes(-30), Column = toDoColumn, Task = task, User = user2 });
+        task.Events.Add(new() { Id = Guid.NewGuid(), Date = DateTimeOffset.Now.AddMinutes(-15), Column = inProgressColumn, PreviousColumn = toDoColumn, Task = task, User = user1 });
+        task.Events.Add(new() { Id = Guid.NewGuid(), Date = DateTimeOffset.Now.AddMinutes(-5), Column = doneColumn, PreviousColumn = inProgressColumn, Task = task, User = user1 });
+        task.Events.Add(new() { Id = Guid.NewGuid(), Date = DateTimeOffset.Now.AddMinutes(-3), Column = inProgressColumn, PreviousColumn = doneColumn, Task = task, User = user2 });
+        task.Events.Add(new() { Id = Guid.NewGuid(), Date = DateTimeOffset.Now, Column = doneColumn, PreviousColumn = inProgressColumn, Task = task, User = user1 });
+
+        return task;
+    }
+}

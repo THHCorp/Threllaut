@@ -1,0 +1,64 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Threllaut.Data.Contexts
+
+@implements IDisposable
+
+@inject IDbContextFactory<ApplicationDbContext> Factory
+
+<MudText Typo="Typo.h4">@Item.Name</MudText>
+<MudDropContainer @ref=_container T="BoardTask" Items="_allTasks" ItemsSelector="@((item, dropzone) => item.Column.Id.ToString() == dropzone)" ItemDropped="ItemUpdated">
+    <ChildContent>
+        <MudStack Row>
+            @foreach (var column in Item.Columns)
+            {
+                <ColumnDisplay Item="column" OnNewTask=AddTaskAsync />
+            }
+        </MudStack>
+    </ChildContent>
+    <ItemRenderer>
+        <TaskCard Item="context" />
+    </ItemRenderer>
+</MudDropContainer>
+
+@code {
+    private List<BoardTask> _allTasks = default!;
+    private MudDropContainer<BoardTask> _container = default!;
+
+    private ApplicationDbContext Context = default!;
+
+    [Parameter]
+    public required Board Item { get; set; }
+
+    public void Dispose() => Context?.Dispose();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Context = await Factory.CreateDbContextAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Context.Boards.Attach(Item);
+        var columnsEntry = Context.Boards.Entry(Item).Collection(b => b.Columns);
+        await columnsEntry.LoadAsync();
+        _allTasks = await columnsEntry.Query().SelectMany(c => c.Tasks).ToListAsync();
+    }
+
+    private Task AddTaskAsync(BoardTask task)
+    {
+        _allTasks.Add(task);
+        Context.Tasks.Add(task);
+        StateHasChanged();
+        _container.Refresh();
+        return Context.SaveChangesAsync();
+    }
+
+    private Task ItemUpdated(MudItemDropInfo<BoardTask> dropItem)
+    {
+        if (dropItem.Item is null)
+            return Task.CompletedTask;
+        Context.Tasks.Update(dropItem.Item);
+        dropItem.Item.Column = Item.Columns.Single(c => c.Id.ToString() == dropItem.DropzoneIdentifier);
+        return Context.SaveChangesAsync();
+    }
+}
