@@ -1,3 +1,4 @@
+using MudBlazor.Services;
 using Threllaut.Web.Components;
 using Threllaut.Shared.Services;
 using Threllaut.Web.Services;
@@ -6,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddRazorComponents()
+builder.Services.AddMudServices()
+    .AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
