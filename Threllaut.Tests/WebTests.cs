@@ -8,9 +8,7 @@ public class WebTests
         // Arrange
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Threllaut_AppHost>();
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
+            clientBuilder.AddStandardResilienceHandler());
         // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
 
         await using var app = await appHost.BuildAsync();

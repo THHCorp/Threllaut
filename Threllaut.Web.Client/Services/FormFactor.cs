@@ -4,13 +4,7 @@ namespace Threllaut.Web.Client.Services;
 
 public class FormFactor : IFormFactor
 {
-    public string GetFormFactor()
-    {
-        return "WebAssembly";
-    }
+    public string GetFormFactor() => "WebAssembly";
 
-    public string GetPlatform()
-    {
-        return Environment.OSVersion.ToString();
-    }
+    public string GetPlatform() => Environment.OSVersion.ToString();
 }

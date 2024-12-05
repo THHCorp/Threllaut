@@ -9,7 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Threllaut.ServiceDefaults\Threllaut.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Threllaut.Web.Client\Threllaut.Web.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0-rc.1.24452.1" />
+	<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0-rc.1.24511.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0-rc.2.24474.3" />
   </ItemGroup>
 
 </Project>
