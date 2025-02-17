@@ -1,5 +1,7 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Localization
+
+<!DOCTYPE html>
+<html lang="@(HttpContext.Features.Get<IRequestCultureFeature>()?.RequestCulture.UICulture.Name ?? "en")">
 
 <head>
     <meta charset="utf-8" />
@@ -7,15 +9,23 @@
     <base href="/" />
     <link rel="stylesheet" href="Threllaut.Web.styles.css" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="_content/Threllaut.Shared/favicon.png" />
-    <HeadOutlet @rendermode="InteractiveAuto" />
+    <link href=@Assets["_content/MudBlazor/MudBlazor.min.css"] rel="stylesheet" />
+    <ImportMap />
+    <HeadOutlet @rendermode="PageRenderMode" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="PageRenderMode" />
     <script src="_framework/blazor.web.js"></script>
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script src=@Assets["_content/MudBlazor/MudBlazor.min.js"]></script>
 </body>
 
 </html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? PageRenderMode =>
+        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+}

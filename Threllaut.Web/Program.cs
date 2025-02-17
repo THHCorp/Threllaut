@@ -22,8 +22,7 @@ builder.AddServiceDefaults();
 
 builder.Services.AddMudServices()
     .AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 
@@ -32,7 +31,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
 }
 else
 {
@@ -48,10 +46,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(
-        typeof(Threllaut.Shared._Imports).Assembly,
-        typeof(Threllaut.Web.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Threllaut.Shared._Imports).Assembly);
 
 await app.RunAsync();
 
