@@ -12,7 +12,14 @@
 
   <ItemGroup>
 	<ProjectReference Include="..\Threllaut.Data\Threllaut.Data.csproj" />
-	<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0-rc.2.24474.3" />
-	<PackageReference Include="MudBlazor" Version="8.0.0-preview.4" />
+	<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.2" />
+	<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+	<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.2" />
+	<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.2" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
+	<PackageReference Include="MudBlazor" Version="8.*" />
+	<PackageReference Include="Extensions.MudBlazor.StaticInput" Version="3.*" />
   </ItemGroup>
 </Project>

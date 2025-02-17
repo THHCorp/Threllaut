@@ -1,4 +1,5 @@
 using Aspire.Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -13,10 +14,47 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddSqlServerDbContext<IdentityDbContext>("database");
 builder.AddSqlServerDbContextFactory<ApplicationDbContext>("database");
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<IdentityDbContext>();
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddMicrosoftAccount(microsoftOptions =>
+    {
+        microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]
+            ?? throw new InvalidOperationException("Missing Microsoft Application (client) ID.");
+        microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]
+            ?? throw new InvalidOperationException("Missing Microsoft Secret ID.");
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+            ?? throw new InvalidOperationException("Missing Google Client ID.");
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
+            ?? throw new InvalidOperationException("Missing Google Client Secret.");
+    })
+    .AddGitHub(githubOptions =>
+    {
+        githubOptions.ClientId = builder.Configuration["Authentication:Github:ClientId"]
+            ?? throw new InvalidOperationException("Missing Github Client ID.");
+        githubOptions.ClientSecret = builder.Configuration["Authentication:Github:ClientSecret"]
+            ?? throw new InvalidOperationException("Missing Github Client secret.");
+    })
+    .AddGitLab(gitlabOptions =>
+    {
+        gitlabOptions.ClientId = builder.Configuration["Authentication:GitLab:ClientId"]
+            ?? throw new InvalidOperationException("Missing GitLab Application ID.");
+        gitlabOptions.ClientSecret = builder.Configuration["Authentication:GitLab:ClientSecret"]
+            ?? throw new InvalidOperationException("Missing GitLab Secret.");
+    })
+    .AddIdentityCookies();
 
 builder.Services.AddAuthorization();
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<IdentityDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
 
 builder.AddServiceDefaults();
 
@@ -25,6 +63,13 @@ builder.Services.AddMudServices()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
+
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 
@@ -47,6 +92,9 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(Threllaut.Shared._Imports).Assembly);
+
+// Add additional endpoints required by the Identity /Account Razor components.
+app.MapAdditionalIdentityEndpoints();
 
 await app.RunAsync();
 

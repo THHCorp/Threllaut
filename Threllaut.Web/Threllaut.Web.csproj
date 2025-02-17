@@ -1,17 +1,31 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-Threllaut.Web-94026c04-2766-4e5e-8b6e-a9dbc7deb803</UserSecretsId>
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.*" />
+	<PackageReference Include="AspNet.Security.OAuth.GitHub" Version="9.*" />
+	<PackageReference Include="AspNet.Security.OAuth.GitLab" Version="9.*" />
+	<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.*" />
+	<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*" />
+    <PackageReference Include="MudBlazor" Version="8.*" />
+    <PackageReference Include="Extensions.MudBlazor.StaticInput" Version="3.*" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Threllaut.Data\Threllaut.Data.csproj" />
     <ProjectReference Include="..\Threllaut.ServiceDefaults\Threllaut.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Threllaut.Web.Client\Threllaut.Web.Client.csproj" />
-	<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0-rc.1.24511.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0-rc.2.24474.3" />
+    <ProjectReference Include="..\Threllaut.Shared\Threllaut.Shared.csproj" />
   </ItemGroup>
 
 </Project>
