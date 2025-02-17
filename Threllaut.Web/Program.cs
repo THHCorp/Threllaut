@@ -1,4 +1,5 @@
 using Aspire.Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,34 +20,7 @@ builder.Services.AddAuthentication(options =>
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
-    .AddMicrosoftAccount(microsoftOptions =>
-    {
-        microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]
-            ?? throw new InvalidOperationException("Missing Microsoft Application (client) ID.");
-        microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]
-            ?? throw new InvalidOperationException("Missing Microsoft Secret ID.");
-    })
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]
-            ?? throw new InvalidOperationException("Missing Google Client ID.");
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
-            ?? throw new InvalidOperationException("Missing Google Client Secret.");
-    })
-    .AddGitHub(githubOptions =>
-    {
-        githubOptions.ClientId = builder.Configuration["Authentication:Github:ClientId"]
-            ?? throw new InvalidOperationException("Missing Github Client ID.");
-        githubOptions.ClientSecret = builder.Configuration["Authentication:Github:ClientSecret"]
-            ?? throw new InvalidOperationException("Missing Github Client secret.");
-    })
-    .AddGitLab(gitlabOptions =>
-    {
-        gitlabOptions.ClientId = builder.Configuration["Authentication:GitLab:ClientId"]
-            ?? throw new InvalidOperationException("Missing GitLab Application ID.");
-        gitlabOptions.ClientSecret = builder.Configuration["Authentication:GitLab:ClientSecret"]
-            ?? throw new InvalidOperationException("Missing GitLab Secret.");
-    })
+    .AddExternalLogins(builder.Configuration)
     .AddIdentityCookies();
 
 builder.Services.AddAuthorization();
