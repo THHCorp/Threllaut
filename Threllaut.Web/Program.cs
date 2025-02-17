@@ -76,6 +76,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseMigrationsEndPoint();
 }
 else
 {
@@ -116,8 +117,11 @@ public static partial class Program
         }
 
         settings.ConnectionString = builder.Configuration.GetConnectionString(connectionName);
-        builder.Services.AddDbContextFactory<ApplicationDbContext>(builder =>
-            builder.UseSqlServer(settings.ConnectionString, builder =>
+        builder.Services.AddDbContextFactory<ApplicationDbContext>(optionsBuilder =>
+        {
+            if (builder.Environment.IsDevelopment())
+                optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseSqlServer(settings.ConnectionString, builder =>
             {
                 if (string.IsNullOrWhiteSpace(settings.ConnectionString) && !EF.IsDesignTime)
                 {
@@ -138,7 +142,8 @@ public static partial class Program
                 {
                     builder.CommandTimeout(settings.CommandTimeout);
                 }
-            }));
+            });
+        });
 
         if (!settings.DisableTracing)
         {
