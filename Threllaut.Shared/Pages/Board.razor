@@ -1,24 +1,37 @@
 ﻿@page "/board"
 
+@using Microsoft.EntityFrameworkCore
+@using Threllaut.Data.Contexts
 @using Threllaut.Shared.Components.Board
+
+@inject IDbContextFactory<ApplicationDbContext> Factory
 
 <PageTitle>Board</PageTitle>
 
-<BoardDisplay Item="board" />
+<BoardDisplay Id="BoardId" />
 
 @code {
-    private Data.Board board = CreateBoard();
+    private static Guid BoardId = new Guid(-98798765, -7865, -28786, 99, 178, 78, 156, 98, 237, 196, 24);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await using ApplicationDbContext context = await Factory.CreateDbContextAsync();
+        if (await context.Boards.FindAsync(BoardId) is not null)
+            return;
+        context.Boards.Add(CreateBoard());
+        await context.SaveChangesAsync();
+    }
 
     private static Data.Board CreateBoard()
     {
         var board = new Data.Board
         {
-            Id = Guid.NewGuid(),
+            Id = BoardId,
             Name = "Task board",
             Description = "Example board with example data.",
             Columns = [],
             Members = [],
-            Owner = null!
+            Owner = new() { Id = Guid.NewGuid(), Email = "dev@thibauthh.eu", UserName = "ThibautHH" }
         };
         
         board.Columns.Add(new() { Id = Guid.NewGuid(), Name = "To Do", Description = "Tasks not yet started", Board = board, Tasks = [] });

@@ -1,64 +1,63 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Threllaut.Data.Contexts
 
-@implements IDisposable
-
 @inject IDbContextFactory<ApplicationDbContext> Factory
 
-<MudText Typo="Typo.h4">@Item.Name</MudText>
-<MudDropContainer @ref=_container T="BoardTask" Items="_allTasks" ItemsSelector="@((item, dropzone) => item.Column.Id.ToString() == dropzone)" ItemDropped="ItemUpdated">
-    <ChildContent>
-        <MudStack Row>
-            @foreach (var column in Item.Columns)
-            {
-                <ColumnDisplay Item="column" OnNewTask=AddTaskAsync />
-            }
-        </MudStack>
-    </ChildContent>
-    <ItemRenderer>
-        <TaskCard Item="context" />
-    </ItemRenderer>
-</MudDropContainer>
+@if (board is not null)
+{
+    <MudText Typo="Typo.h4">@board.Name</MudText>
+    <MudDropContainer @ref=_container T="BoardTask"
+        Items="board.Columns.SelectMany(c => c.Tasks)" ItemDropped="ItemUpdatedAsync"
+        ItemsSelector="@((item, dropzone) => item.Column.Id.ToString() == dropzone)">
+        <ChildContent>
+            <MudStack Row>
+                @foreach (var column in board.Columns)
+                {
+                    <ColumnDisplay Item="column" OnNewTask=AddTaskAsync />
+                }
+            </MudStack>
+        </ChildContent>
+        <ItemRenderer>
+            <TaskCard Item="context" />
+        </ItemRenderer>
+    </MudDropContainer>
+}
 
 @code {
-    private List<BoardTask> _allTasks = default!;
     private MudDropContainer<BoardTask> _container = default!;
 
-    private ApplicationDbContext Context = default!;
+    private Board board = default!;
 
     [Parameter]
-    public required Board Item { get; set; }
-
-    public void Dispose() => Context?.Dispose();
-
-    protected override async Task OnInitializedAsync()
-    {
-        Context = await Factory.CreateDbContextAsync();
-    }
+    public required Guid Id { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        Context.Boards.Attach(Item);
-        var columnsEntry = Context.Boards.Entry(Item).Collection(b => b.Columns);
-        await columnsEntry.LoadAsync();
-        _allTasks = await columnsEntry.Query().SelectMany(c => c.Tasks).ToListAsync();
+        await using var context = await Factory.CreateDbContextAsync();
+        board = await context.Boards.AsSingleQuery().AsNoTracking()
+            .Include(b => b.Columns)
+            .ThenInclude(c => c.Tasks)
+            .SingleAsync(b => b.Id == Id);
     }
 
-    private Task AddTaskAsync(BoardTask task)
+    private async Task AddTaskAsync(BoardTask task)
     {
-        _allTasks.Add(task);
-        Context.Tasks.Add(task);
+        await using var context = await Factory.CreateDbContextAsync();
+        task.Column.Tasks.Add(task);
         StateHasChanged();
         _container.Refresh();
-        return Context.SaveChangesAsync();
+        context.Attach(task.Column);
+        context.Tasks.Add(task);
+        await context.SaveChangesAsync();
     }
 
-    private Task ItemUpdated(MudItemDropInfo<BoardTask> dropItem)
+    private async Task ItemUpdatedAsync(MudItemDropInfo<BoardTask> dropItem)
     {
+        await using var context = await Factory.CreateDbContextAsync();
         if (dropItem.Item is null)
-            return Task.CompletedTask;
-        Context.Tasks.Update(dropItem.Item);
-        dropItem.Item.Column = Item.Columns.Single(c => c.Id.ToString() == dropItem.DropzoneIdentifier);
-        return Context.SaveChangesAsync();
+            return;
+        dropItem.Item.Column = board.Columns.Single(c => c.Id.ToString() == dropItem.DropzoneIdentifier);
+        context.Tasks.Update(dropItem.Item);
+        await context.SaveChangesAsync();
     }
 }

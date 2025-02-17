@@ -3,45 +3,46 @@
 @using Microsoft.Extensions.Logging
 @using Threllaut.Data.Contexts
 
-@implements IDisposable
-
 @inject IDbContextFactory<ApplicationDbContext> Factory
 
-<MudText Typo="Typo.h4">@Item.Name</MudText>
+@if (board is not null)
+{
+    <MudText Typo="Typo.h4">@board.Name</MudText>
 
-<MudDataGrid Items="_allTasks" MultiSelection Groupable Filterable GroupExpanded>
-    <ToolBarContent>
-        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => _open = !_open" />
-        <MudPopover Open="_open" Paper="false" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.BottomLeft">
-            <MudCard>
-                <MudCardHeader>Add new task</MudCardHeader>
-                <MudCardContent>
-                    <MudForm @ref=_form @bind-IsValid="_success" ValidationDelay="50">
-                        <MudTextField @ref=_nameField T="string" Label="Name" Required RequiredError="Name is required."
-                        Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" />
-                        <MudTextField @ref=_descriptionField T="string" Label="Description" />
-                        <MudAutocomplete @ref=_columnField Label="Category" @bind-Value="_column"
-                        SearchFunc="Search"
-                        ToStringFunc="@(c => c?.Name)"
-                        Required RequiredError="Task category is required." Clearable="true"
-                        OnClearButtonClick="Clear" />
-                    </MudForm>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=AddTaskAsync>Add</MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudPopover>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Property="t => t.Name" />
-        <PropertyColumn Property="t => t.Column.Name" Title="Category" Groupable="true" @bind-Grouping=_columnGroup />
-    </Columns>
-</MudDataGrid>
+    <MudDataGrid Items="board.Columns.SelectMany(c => c.Tasks)" MultiSelection Groupable Filterable GroupExpanded>
+        <ToolBarContent>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => _open = !_open" />
+            <MudPopover Open="_open" Paper="false" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.BottomLeft">
+                <MudCard>
+                    <MudCardHeader>Add new task</MudCardHeader>
+                    <MudCardContent>
+                        <MudForm @ref=_form @bind-IsValid="_success" ValidationDelay="50">
+                            <MudTextField @ref=_nameField T="string" Label="Name" Required RequiredError="Name is required."
+                            Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" />
+                            <MudTextField @ref=_descriptionField T="string" Label="Description" />
+                            <MudAutocomplete @ref=_columnField Label="Category" @bind-Value="_column"
+                                SearchFunc="Search"
+                                ToStringFunc="@(c => c?.Name)"
+                                Required RequiredError="Task category is required." Clearable="true"
+                                OnClearButtonClick="Clear" />
+                        </MudForm>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=AddTaskAsync>Add</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudPopover>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="t => t.Name" />
+            <PropertyColumn Property="t => t.Column.Name" Title="Category" Groupable="true" @bind-Grouping=_columnGroup />
+        </Columns>
+    </MudDataGrid>
+}
 
 @code {
+    private Board board = default!;
     private bool _columnGroup = true;
-    private List<BoardTask> _allTasks = default!;
     private bool _open;
     private bool _success;
     private MudTextField<string> _nameField = default!;
@@ -50,31 +51,21 @@
     private MudAutocomplete<Column> _columnField = default!;
     private MudForm _form = default!;
 
-    bool _busy;
-
-    private ApplicationDbContext Context = default!;
-
     [Parameter]
-    public required Board Item { get; set; }
-
-    public void Dispose() => Context?.Dispose();
+    public required Guid Id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Context = await Factory.CreateDbContextAsync();
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        Context.Boards.Attach(Item);
-        await Context.Boards.Entry(Item).Collection(b => b.Columns).LoadAsync();
-        _allTasks = await Context.Boards.Entry(Item)
-            .Collection(b => b.Columns).Query()
-            .SelectMany(c => c.Tasks).ToListAsync();
+        await using var context = await Factory.CreateDbContextAsync();
+        board = await context.Boards.AsSingleQuery().AsNoTracking()
+            .Include(b => b.Columns)
+            .ThenInclude(c => c.Tasks)
+            .SingleAsync(b => b.Id == Id);
     }
 
     private async Task AddTaskAsync()
     {
+        await using var context = await Factory.CreateDbContextAsync();
         var task = new BoardTask
             {
                 Name = _nameField.Value!,
@@ -84,21 +75,12 @@
                 Events = []
             };
         _column!.Tasks.Add(task);
+        context.Attach(_column);
+        context.Tasks.Add(task);
+        await context.SaveChangesAsync();
         _open = false;
-        _allTasks.Add(task);
         _column = null;
         StateHasChanged();
-        if (_busy)
-            return;
-        try
-        {
-            _busy = true;
-            await Context.SaveChangesAsync();
-        }
-        finally
-        {
-            _busy = false;
-        }
     }
 
     private async Task Clear()
@@ -110,7 +92,7 @@
     }
 
     private Task<IEnumerable<Column>> Search(string? value, CancellationToken cancellationToken = default) => Task.FromResult(
-        Item.Columns.Where(c => _column is null
+        board.Columns.Where(c => _column is null
                 && c != _column
                 && c.Name.Contains(value ?? string.Empty, StringComparison.CurrentCultureIgnoreCase)));
 }
