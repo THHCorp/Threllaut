@@ -5,12 +5,24 @@
         <PropertyColumn Property="t => t.PreviousColumn != null ? t.PreviousColumn.Name : string.Empty" Title="Removed from" Sortable="true" />
         <PropertyColumn Property="t => t.Column.Name" Title="Placed in" Sortable="true" />
         <PropertyColumn Property="t => t.Date" Sortable="true" />
-        <PropertyColumn Property="t => t.User" Sortable="true" SortBy="task => task.User.NormalizedUserName"
+        <TemplateColumn Sortable="true" SortBy="task => task.User.NormalizedUserName"
             Groupable="true" GroupBy="task => task.User.Id">
+            <CellTemplate>
+                <MudListItem>
+                    <AvatarContent>
+                        <MudAvatar>
+                            <MudImage Src="https://t3.ftcdn.net/jpg/03/53/11/00/360_F_353110097_nbpmfn9iHlxef4EDIhXB1tdTD0lcWhG9.jpg" />
+                        </MudAvatar>
+                    </AvatarContent>
+                    <ChildContent>
+                        <MudText>@context.Item.User.UserName</MudText>
+                    </ChildContent>
+                </MudListItem>
+            </CellTemplate>
             <GroupTemplate>
                 Changes by @(context.Grouping.First().User.UserName)
             </GroupTemplate>
-        </PropertyColumn>
+        </TemplateColumn>
     </Columns>
 </MudDataGrid>
 
