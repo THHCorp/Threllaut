@@ -31,7 +31,7 @@
     [Parameter]
     public required Guid Id { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         await using var context = await Factory.CreateDbContextAsync();
         board = await context.Boards.AsSingleQuery().AsNoTracking()
@@ -56,8 +56,8 @@
         await using var context = await Factory.CreateDbContextAsync();
         if (dropItem.Item is null)
             return;
+        context.Tasks.Attach(dropItem.Item);
         dropItem.Item.Column = board.Columns.Single(c => c.Id.ToString() == dropItem.DropzoneIdentifier);
-        context.Tasks.Update(dropItem.Item);
         await context.SaveChangesAsync();
     }
 }
