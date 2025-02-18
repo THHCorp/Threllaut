@@ -4,8 +4,6 @@
 @using Threllaut.Data.Contexts
 @using Threllaut.Shared.Components.TaskGrid
 
-@implements IDisposable
-
 @inject IDbContextFactory<ApplicationDbContext> Factory
 
 <PageTitle>Grid</PageTitle>
@@ -16,7 +14,7 @@
     SearchFunc="Search" ToStringFunc="@(c => c?.Name)"
     Clearable="true" OnClearButtonClick="Clear" />
 } else {
-    <TaskGrid Item="_board" />
+    <TaskGrid Id="_board.Id" />
 }
 
 @code {
@@ -24,14 +22,10 @@
     private MudAutocomplete<Data.Board> _boardSelector = default!;
     private List<Data.Board> _boards = default!;
 
-    private ApplicationDbContext Context = default!;
-
-    public void Dispose() => Context?.Dispose();
-
     protected override async Task OnInitializedAsync() 
     {
-        Context = await Factory.CreateDbContextAsync();
-        _boards = await Context.Boards.AsSingleQuery().AsNoTracking().ToListAsync();
+        await using var context = await Factory.CreateDbContextAsync();
+        _boards = await context.Boards.AsSingleQuery().AsNoTracking().ToListAsync();
     }
 
     private async Task Clear()
@@ -41,6 +35,6 @@
         StateHasChanged();
     }
 
-    private async Task<IEnumerable<Data.Board>> Search(string? value, CancellationToken cancellationToken = default) =>
-        (IEnumerable<Data.Board>)_boards.Where(c => c.Name.Contains(value ?? string.Empty));
+    private Task<IEnumerable<Data.Board>> Search(string? value, CancellationToken cancellationToken = default) =>
+        Task.FromResult((IEnumerable<Data.Board>)_boards.Where(c => c.Name.Contains(value ?? string.Empty)));
 }

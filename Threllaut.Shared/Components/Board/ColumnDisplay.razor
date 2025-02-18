@@ -2,8 +2,8 @@
 
 <MudCard Style="width: 200px">
     <MudCardHeader>@Item.Name</MudCardHeader>
-    <MudCardContent>
-        <MudDropZone T="BoardTask" AllowReorder Identifier="@Item.Id.ToString()" Class="object-fill" />
+    <MudCardContent Class="d-flex flex-wrap flex-grow-1">
+        <MudDropZone T="BoardTask" AllowReorder Identifier="@Item.Id.ToString()" Class="flex-grow-1" />
     </MudCardContent>
     <MudCardActions>
         <MudButton OnClick="() => _open = !_open">@(_open ? "Close" : "Add task")</MudButton>
