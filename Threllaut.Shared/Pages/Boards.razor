@@ -1,0 +1,96 @@
+﻿@page "/boards"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+@using Threllaut.Data.Contexts
+
+@attribute [Authorize]
+
+@inject IDbContextFactory<ApplicationDbContext> Factory
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+
+<MudText Typo="Typo.h4">Boards</MudText>
+
+<MudDataGrid Items="boards" MultiSelection Groupable Filterable GroupExpanded>
+    <ToolBarContent>
+        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => _open = !_open" />
+        <MudPopover Open="_open" Paper="false" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.BottomLeft">
+            <MudCard>
+                <MudCardHeader>Add new board</MudCardHeader>
+                <MudCardContent>
+                    <MudForm @bind-IsValid="_success" ValidationDelay="50">
+                        <MudTextField @ref=_nameField T="string" Label="Name" Required RequiredError="Name is required."
+                                        Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" />
+                        <MudTextField @ref=_descriptionField T="string" Label="Description" />
+                    </MudForm>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=AddBoardAsync>Add</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudPopover>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="b => b.Name" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Variant="@Variant.Filled" Color="@Color.Secondary" OnClick="@(() => NavigationManager.NavigateTo($"edit?id={context.Item.Id}"))" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Variant="@Variant.Filled" Color="@Color.Secondary" OnClick="@(() => DeleteBoardAsync(context.Item))" />
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<Data.Board> boards = default!;
+    private bool _open;
+    private bool _success;
+    private MudTextField<string> _nameField = default!;
+    private MudTextField<string> _descriptionField = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await Factory.CreateDbContextAsync();
+        boards = await context.Boards.AsSingleQuery().AsNoTracking()
+            .ToListAsync();
+    }
+
+    private async Task AddBoardAsync()
+    {
+        if (authenticationState is null)
+            return;
+        await using var context = await Factory.CreateDbContextAsync();
+        ApplicationUser user = await UserManager.GetUserAsync((await authenticationState).User);
+        var board = new Data.Board
+            {
+                Name = _nameField.Value!,
+                Description = _descriptionField.Value,
+                Owner = user,
+                Members = [user],
+                Columns = []
+            };
+        context.Set<ApplicationUser>().Attach(user);
+        context.Boards.Add(board);
+        await context.SaveChangesAsync();
+        _open = false;
+        boards.Add(board);
+        StateHasChanged();
+    }
+
+    private async Task DeleteBoardAsync(Data.Board board)
+    {
+        await using var context = await Factory.CreateDbContextAsync();
+        context.Boards.Remove(board);
+        await context.SaveChangesAsync();
+        boards.Remove(board);
+        StateHasChanged();
+    }
+}
