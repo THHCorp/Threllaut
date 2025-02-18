@@ -34,6 +34,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         var board = new Board
         {
+            Id = new(-98798765, -7865, -28786, 99, 178, 78, 156, 98, 237, 196, 24),
             Name = "Task board",
             Description = "Example board with example data.",
             Columns = [],

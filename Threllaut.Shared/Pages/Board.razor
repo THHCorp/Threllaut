@@ -12,37 +12,4 @@
 
 @code {
     private static Guid BoardId = new Guid(-98798765, -7865, -28786, 99, 178, 78, 156, 98, 237, 196, 24);
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await using ApplicationDbContext context = await Factory.CreateDbContextAsync();
-        if (await context.Boards.FindAsync(BoardId) is not null)
-            return;
-        context.Boards.Add(CreateBoard());
-        await context.SaveChangesAsync();
-    }
-
-    private static Data.Board CreateBoard()
-    {
-        var board = new Data.Board
-        {
-            Id = BoardId,
-            Name = "Task board",
-            Description = "Example board with example data.",
-            Columns = [],
-            Members = [],
-            Owner = new() { Id = Guid.NewGuid(), Email = "dev@thibauthh.eu", UserName = "ThibautHH" }
-        };
-        
-        board.Columns.Add(new() { Id = Guid.NewGuid(), Name = "To Do", Description = "Tasks not yet started", Board = board, Tasks = [] });
-        board.Columns.Add(new() { Id = Guid.NewGuid(), Name = "In Progress", Description = "Tasks currently being worked on", Board = board, Tasks = [] });
-        board.Columns.Add(new() { Id = Guid.NewGuid(), Name = "Done", Description = "Tasks that have been completed", Board = board, Tasks = [] });
-
-        board.Columns[0].Tasks.Add(new() { Id = Guid.NewGuid(), Name = "Example task 1", Description = "Example task 1 description", Assignees = [], Column = board.Columns[0], Events = [] });
-        board.Columns[0].Tasks.Add(new() { Id = Guid.NewGuid(), Name = "Example task 2", Description = "Example task 2 description", Assignees = [], Column = board.Columns[0], Events = [] });
-        board.Columns[1].Tasks.Add(new() { Id = Guid.NewGuid(), Name = "Example task 3", Description = "Example task 3 description", Assignees = [], Column = board.Columns[1], Events = [] });
-        board.Columns[2].Tasks.Add(new() { Id = Guid.NewGuid(), Name = "Example task 4", Description = "Example task 4 description", Assignees = [], Column = board.Columns[2], Events = [] });
-
-        return board;
-    }
 }
