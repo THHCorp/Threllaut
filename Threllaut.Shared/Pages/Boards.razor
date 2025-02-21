@@ -56,25 +56,27 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
+    private async Task<ApplicationUser> GetUserAsync() => (await UserManager.GetUserAsync((await authenticationState!).User))!;
+
     protected override async Task OnInitializedAsync()
     {
         await using var context = await Factory.CreateDbContextAsync();
+        var user = await GetUserAsync();
         boards = await context.Boards.AsSingleQuery().AsNoTracking()
+            .Where(b => b.Owner == user || b.Members.Contains(user))
             .ToListAsync();
     }
 
     private async Task AddBoardAsync()
     {
-        if (authenticationState is null)
-            return;
         await using var context = await Factory.CreateDbContextAsync();
-        ApplicationUser user = await UserManager.GetUserAsync((await authenticationState).User);
+        var user = await GetUserAsync();
         var board = new Data.Board
             {
                 Name = _nameField.Value!,
                 Description = _descriptionField.Value,
                 Owner = user,
-                Members = [user],
+                Members = [],
                 Columns = []
             };
         context.Set<ApplicationUser>().Attach(user);
@@ -82,7 +84,6 @@
         await context.SaveChangesAsync();
         _open = false;
         boards.Add(board);
-        StateHasChanged();
     }
 
     private async Task DeleteBoardAsync(Data.Board board)
@@ -91,6 +92,5 @@
         context.Boards.Remove(board);
         await context.SaveChangesAsync();
         boards.Remove(board);
-        StateHasChanged();
     }
 }
