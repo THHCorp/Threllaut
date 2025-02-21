@@ -66,21 +66,18 @@
     private async Task AddTaskAsync()
     {
         await using var context = await Factory.CreateDbContextAsync();
-        var task = new BoardTask
+        context.Attach(_column!);
+        _column!.Tasks.Add(new BoardTask
             {
                 Name = _nameField.Value!,
                 Description = _descriptionField.Value,
                 Column = _column!,
                 Assignees = [],
                 Events = []
-            };
-        _column!.Tasks.Add(task);
-        context.Attach(_column);
-        context.Tasks.Add(task);
+            });
         await context.SaveChangesAsync();
         _open = false;
         _column = null;
-        StateHasChanged();
     }
 
     private async Task Clear()
@@ -88,7 +85,6 @@
         this._column = null;
         await _columnField.ResetAsync();
         await _form.Validate();
-        StateHasChanged();
     }
 
     private Task<IEnumerable<Column>> Search(string? value, CancellationToken cancellationToken = default) => Task.FromResult(

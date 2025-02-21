@@ -8,12 +8,11 @@
 
 <PageTitle>Grid</PageTitle>
 
-@if (_board is null)
-{
-    <MudAutocomplete @ref=_boardSelector Label="Board" @bind-Value="_board"
+<MudAutocomplete @ref=_boardSelector Label="Board" @bind-Value="_board"
     SearchFunc="Search" ToStringFunc="@(c => c?.Name)"
     Clearable="true" OnClearButtonClick="Clear" />
-} else {
+@if (_board is not null)
+{
     <TaskGrid Id="_board.Id" />
 }
 
@@ -32,7 +31,6 @@
     {
         this._board = null;
         await _boardSelector.ResetAsync();
-        StateHasChanged();
     }
 
     private Task<IEnumerable<Data.Board>> Search(string? value, CancellationToken cancellationToken = default) =>
