@@ -8,23 +8,51 @@
 
 <PageTitle>Edit board</PageTitle>
 
-@if(board is not null)
+@if(_board is not null)
 {
-    <MudText Typo="Typo.h4">Editing board '@board.Name'</MudText>
+    <MudText Typo="Typo.h4">Editing board '@_board.Name'</MudText>
 
     <MudForm @bind-IsValid="_success" ValidationDelay="50">
-        <MudTextField T="string" Label="Name" Required RequiredError="Name is required."
-            Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" 
-            @bind-Value=board.Name />
-        <MudTextField T="string" Label="Description" @bind-Value=board.Description />
+        <MudTextField Label="@(nameof(_board.Name))" Required RequiredError="Name is required."
+        Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })" 
+        @bind-Value=_board.Name />
+        <MudTextField Label="@(nameof(_board.Description))" @bind-Value=_board.Description />
     </MudForm>
 
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=SaveBoardAsync>Save</MudButton>
+
+    <MudDataGrid Items=_board.Columns>
+        <ToolBarContent>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="() => _open = !_open" />
+            <MudPopover Open="_open" Paper="false" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.BottomLeft">
+                <MudCard>
+                    <MudCardHeader>Add new task</MudCardHeader>
+                    <MudCardContent>
+                        <MudForm @bind-IsValid="_success" ValidationDelay="50">
+                            <MudTextField Label="@(nameof(Column.Name))" Required RequiredError="Name is required."
+                                Validation="@(new MaxLengthAttribute(50) { ErrorMessage = "The name is too long" })"
+                                @bind-Value="_columnName" />
+                            <MudTextField Label="@(nameof(Column.Description))" @bind-Value="_columnDescription" />
+                        </MudForm>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick=AddColumnAsync>Add</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudPopover>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="c => c.Name" />
+            <PropertyColumn Property="c => c.Description" />
+        </Columns>
+    </MudDataGrid>
 }
 
 @code {
-    private Data.Board board = default!;
-    private bool _success;
+    private Data.Board _board = default!;
+    private bool _success, _open;
+    private string _columnName = string.Empty;
+    private string? _columnDescription;
 
     [SupplyParameterFromQuery]
     public Guid Id { get; set; }
@@ -32,7 +60,7 @@
     protected override async Task OnInitializedAsync()
     {
         await using var context = await Factory.CreateDbContextAsync();
-        board = await context.Boards.AsSingleQuery().AsNoTracking()
+        _board = await context.Boards.AsSingleQuery().AsNoTracking()
             .Include(b => b.Columns)
             .SingleAsync(b => b.Id == Id);
     }
@@ -40,9 +68,23 @@
     private async Task SaveBoardAsync()
     {
         await using var context = await Factory.CreateDbContextAsync();
-        context.Boards.Attach(board);
-        context.Boards.Entry(board).State = EntityState.Modified;
+        context.Boards.Attach(_board);
+        context.Boards.Entry(_board).State = EntityState.Modified;
         await context.SaveChangesAsync();
     }
 
+    private async Task AddColumnAsync()
+    {
+        await using var context = await Factory.CreateDbContextAsync();
+        context.Boards.Attach(_board);
+        _board.Columns.Add(new Column
+            {
+                Name = _columnName,
+                Description = _columnDescription,
+                Board = _board,
+                Tasks = []
+            });
+        await context.SaveChangesAsync();
+        _open = false;
+    }
 }
